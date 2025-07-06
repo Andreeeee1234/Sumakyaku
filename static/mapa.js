@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     inicializarFormularioNodo();
     inicializarFormularioPuntoCritico();
 });
+function formatNumber(num) {
+    return num.toLocaleString('es-PE');
+}
 
 function initializeMap() {
     map = L.map('map').setView([-16.4090, -71.5375], 12);
@@ -238,78 +241,64 @@ function visualizarAristas(nodos, aristas) {
     
     console.log(`Visualized ${aristas.length} connections on the map`);
 }
-
 function mostrarResultados(rutas, flujos, fuente) {
     const resultadosDiv = document.getElementById('resultados');
+    const flujosOrdenados = Object.entries(flujos).sort((a, b) => b[1] - a[1]);
     
     let html = `
-        <div class="mb-3">
-            <h6 class="text-success">
-                <i class="fas fa-check-circle me-2"></i>
-                Procesamiento Completado
-            </h6>
-            <p class="small text-muted mb-3">Fuente principal: <strong>${fuente}</strong></p>
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            Procesamiento completado desde <strong>${fuente}</strong>
         </div>
-    `;
-
-    html += `
-        <div class="mb-4">
-            <h6 class="mb-3">
-                <i class="fas fa-route me-2"></i>
-                Rutas Óptimas
-            </h6>
-    `;
-    
-    for (const [destino, ruta] of Object.entries(rutas)) {
-        html += '<div class="route-item mb-2">';
-        html += `<div class="fw-bold small">${destino}</div>`;
         
-        if (ruta && ruta.length > 0) {
-            html += `<div class="small text-muted">${ruta.join(' → ')}</div>`;
-        } else {
-            html += '<div class="small text-danger">❌ Sin ruta disponible</div>';
-        }
-        html += '</div>';
-    }
-    
-    html += '</div>';
-
-    html += `
-        <div class="mb-4">
-            <h6 class="mb-3">
-                <i class="fas fa-tint me-2"></i>
-                Flujos Máximos
-            </h6>
+        <h5 class="mt-4 mb-3"><i class="fas fa-tint me-2"></i>Flujos Máximos</h5>
+        <div class="row">
     `;
     
-    for (const [destino, flujo] of Object.entries(flujos)) {
-        html += '<div class="flow-item mb-2">';
-        html += `<div class="fw-bold small">${destino}</div>`;
-        html += `<div class="small text-muted">${formatNumber(flujo)} L/h</div>`;
-        html += '</div>';
-    }
+    flujosOrdenados.forEach(([destino, flujo], index) => {
+        if (index % 2 === 0) html += '<div class="col-md-6">';
+        
+        html += `
+            <div class="mb-3 p-2 border rounded">
+                <span class="badge bg-primary">${destino}</span>
+                <span class="float-end">${formatNumber(flujo)} L/h</span>
+            </div>
+        `;
+        
+        if (index % 2 !== 0 || index === flujosOrdenados.length - 1) html += '</div>';
+    });
     
-    html += '</div>';
+    html += `</div>`;
     
-    const totalRutas = Object.values(rutas).filter(r => r !== null).length;
+    const rutasActivas = Object.values(rutas).filter(r => r !== null).length;
     const totalDestinos = Object.keys(rutas).length;
-    const flujoTotal = Object.values(flujos).reduce((sum, f) => sum + f, 0);
+    const flujoTotal = Object.values(flujos).reduce((a, b) => a + b, 0);
     
     html += `
-        <div class="card bg-secondary">
-            <div class="card-body py-2">
-                <h6 class="card-title small mb-2">📊 Resumen</h6>
-                <div class="small">
-                    <div>Rutas activas: ${totalRutas}/${totalDestinos}</div>
-                    <div>Flujo total: ${formatNumber(flujoTotal)} L/h</div>
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-chart-bar me-2"></i>Resumen
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="h4">${rutasActivas}/${totalDestinos}</div>
+                            <small class="text-muted">Rutas activas</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="h4">${formatNumber(flujoTotal)}</div>
+                            <small class="text-muted">Flujo total (L/h)</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     `;
     
     resultadosDiv.innerHTML = html;
-
-    visualizarRutasEnMapa(rutas, flujos);
 }
 
 function visualizarRutasEnMapa(rutas, flujos) {
@@ -564,5 +553,5 @@ function generarRedCompleta() {
 }
 +
 function formatNumber(num) {
-    return new Intl.NumberFormat('es-PE').format(num);
+    return num.toLocaleString('es-PE');
 }

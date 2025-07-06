@@ -16,7 +16,7 @@ def calcular_distancia(coord1, coord2):
 def generar_nodos_distribucion(num_nodos=500):
     """Genera nodos de distribución de agua por toda Arequipa"""
     nodos = []
-    tipos_distribucion = ['cuadra', 'tubo', 'bomba', 'valvula']
+    tipos_distribucion = ['tubo', 'bomba', 'valvula']
     estados = ['transitable', 'transitable', 'transitable', 'obstaculo'] 
 
     for i in range(1, num_nodos + 1):
